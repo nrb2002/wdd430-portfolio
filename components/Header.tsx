@@ -5,7 +5,7 @@ export default function Header() {
     <header className="bg-blue-600 text-white shadow-md">
       <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
         <h1 id="header-title" className="text-2xl font-bold">
-          Xavier Rodriguez
+          Baron Tshibasu
         </h1>
 
         <nav>

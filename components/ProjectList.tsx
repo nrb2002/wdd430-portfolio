@@ -1,4 +1,4 @@
-import ProjectCard from "./ProjectCard";
+import ProjectCard from './ProjectCard';
 
 interface Project {
   title: string;
@@ -11,16 +11,11 @@ interface ProjectListProps {
   projects: Project[];
 }
 
-export default function ProjectList({
-  projects,
-}: ProjectListProps) {
+export default function ProjectList({ projects }: ProjectListProps) {
   return (
-    <section className="grid gap-6 md:grid-cols-2">
+    <section className="grid gap-4 md:grid-cols-2">
       {projects.map((project) => (
-        <ProjectCard
-          key={project.title}
-          {...project}
-        />
+        <ProjectCard key={project.title} {...project} />
       ))}
     </section>
   );
