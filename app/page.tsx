@@ -46,7 +46,7 @@ export default function Home() {
         />
 
         <p className="text-lg text-gray-700 max-w-2xl mx-auto">
-          Welcome! I'm a software developer passionate about full-stack
+          Welcome to My Portfolio site! I'm a software developer passionate about full-stack
           development, modern web technologies, and building useful
           applications with React and Next.js.
         </p>
