@@ -38,7 +38,7 @@ export default function Home() {
           My Portfolio
         </h1>
         <Image
-          src="/baron.jpg"
+          src="/images/baron.jpg"
           alt="Baron Tshibasu profile picture"
           width={180}
           height={180}
