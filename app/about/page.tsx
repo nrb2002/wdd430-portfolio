@@ -8,7 +8,7 @@ export default function About() {
       </h1>
 
       <p className="text-lg text-gray-700 mb-8">
-        I am a software development student interested in web
+        I am a software developer specializing in web
         development, backend APIs, databases, and cloud technologies.
         I enjoy creating responsive websites and scalable applications
         using modern JavaScript frameworks.

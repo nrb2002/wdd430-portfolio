@@ -14,7 +14,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">
+      <body className="relative min-h-screen flex flex-col overflow-x-hidden bg-slate-950">
+        <div className="bubble-container pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          {Array.from({ length: 20 }).map((_, index) => (
+            <span key={index} className={`bubble bubble-${index + 1}`}></span>
+          ))}
+        </div>
+
         <Header />
 
         <main className="flex-grow">
