@@ -18,16 +18,25 @@ export default function Header() {
               <li>
                 <Link
                   href="/"
-                  className="hover:text-blue-200 transition-colors"
+                  className="rounded-lg px-4 py-2 hover:bg-[#081C33] text-white"
                 >
                   Home
                 </Link>
               </li>
 
               <li>
+                  <Link
+                    href="/projects"
+                    className="rounded-lg px-4 py-2 hover:bg-[#081C33] text-white"
+                  >
+                    Projects
+                  </Link>
+                </li>
+
+              <li>
                 <Link
                   href="/about"
-                  className="hover:text-blue-200 transition-colors"
+                  className="rounded-lg px-4 py-2 hover:bg-[#081C33] text-white"
                 >
                   About
                 </Link>
@@ -47,7 +56,7 @@ export default function Header() {
                 <li>
                   <Link
                     href="/"
-                    className="block rounded-md px-3 py-2 transition-colors hover:bg-accent-dark hover:text-cyan-300"
+                    className="rounded-lg px-4 py-2 hover:bg-[#081C33]"
                   >
                     Home
                   </Link>
@@ -55,8 +64,17 @@ export default function Header() {
 
                 <li>
                   <Link
+                    href="/projects"
+                    className="rounded-lg px-4 py-2 hover:bg-[#081C33]"
+                  >
+                    Projects
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
                     href="/about"
-                    className="block rounded-md px-3 py-2 transition-colors hover:bg-white/10 hover:text-cyan-300"
+                    className="rounded-lg px-4 py-2 hover:bg-[#081C33]"
                   >
                     About
                   </Link>
