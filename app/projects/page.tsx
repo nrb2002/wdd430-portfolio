@@ -1,5 +1,7 @@
 // app/projects/page.tsx
 
+import { getProjects } from "@/lib/projects-db";
+
 interface Project {
   id: number;
   title: string;
@@ -9,24 +11,12 @@ interface Project {
   link?: string;
 }
 
-async function getProjects(): Promise<Project[]> {
-  const res = await fetch("http://localhost:3000/api/projects", {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch projects");
-  }
-
-  return res.json();
-}
-
 export default async function ProjectsPage() {
-  const projects = await getProjects();
+  const projects: Project[] = await getProjects();
 
   return (
     <section>
-      <h2 className="text-3xl font-bold mb-4">Projects Overview</h2>
+      <h2 className="mb-4 text-3xl font-bold">Projects Overview</h2>
 
       <p className="mb-6">Welcome to my projects page.</p>
 
@@ -34,7 +24,7 @@ export default async function ProjectsPage() {
         {projects.map((project) => (
           <article
             key={project.id}
-            className="border rounded-lg p-4 shadow-sm"
+            className="rounded-lg border p-4 shadow-sm"
           >
             <h3 className="text-xl font-semibold">{project.title}</h3>
 
@@ -54,7 +44,7 @@ export default async function ProjectsPage() {
                 href={project.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline mt-2 inline-block"
+                className="mt-2 inline-block text-blue-600 hover:underline"
               >
                 View Project
               </a>
