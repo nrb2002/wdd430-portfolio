@@ -1,5 +1,3 @@
-// Header.tsx
-
 import Link from "next/link";
 
 export default function Header() {
@@ -10,7 +8,7 @@ export default function Header() {
 
           {/* Logo / Name */}
           <h1 className="text-2xl font-bold">
-            <Link href="/" className="text-dark">Baron Tshibasu</Link>
+            Baron Tshibasu
           </h1>
 
           {/* Desktop Navigation */}
@@ -37,8 +35,16 @@ export default function Header() {
                   <span className="text-sm">▾</span>
                 </button>
 
-                {/* Dropdown Menu */}
+                {/* Desktop Dropdown */}
                 <div className="invisible absolute left-0 top-full z-50 mt-2 w-48 rounded-xl border border-white/20 bg-[#0B2545]/95 p-2 text-white opacity-0 shadow-xl backdrop-blur-md transition-all duration-200 group-hover:visible group-hover:opacity-100">
+
+                  <Link
+                    href="/projects"
+                    className="block rounded-lg px-4 py-2 hover:bg-[#081C33]"
+                  >
+                    All Projects
+                  </Link>
+
                   <Link
                     href="/opensource"
                     className="block rounded-lg px-4 py-2 hover:bg-[#081C33]"
@@ -52,6 +58,7 @@ export default function Header() {
                   >
                     School Projects
                   </Link>
+
                 </div>
               </li>
 
@@ -95,6 +102,14 @@ export default function Header() {
                     </summary>
 
                     <div className="mt-2 ml-2 flex flex-col gap-1 border-l border-white/20 pl-2">
+
+                      <Link
+                        href="/projects"
+                        className="rounded-lg px-4 py-2 hover:bg-[#081C33]"
+                      >
+                        All Projects
+                      </Link>
+
                       <Link
                         href="/opensource"
                         className="rounded-lg px-4 py-2 hover:bg-[#081C33]"
@@ -108,6 +123,7 @@ export default function Header() {
                       >
                         School Projects
                       </Link>
+
                     </div>
                   </details>
                 </li>
@@ -131,4 +147,3 @@ export default function Header() {
     </header>
   );
 }
-

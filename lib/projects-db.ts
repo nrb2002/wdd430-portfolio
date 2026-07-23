@@ -1,85 +1,146 @@
-// lib/projects-db.
-import { sql } from '@vercel/postgres';
+// lib/projects-db.ts
+
+import { sql } from "@vercel/postgres";
 
 export interface Project {
   id: number;
   title: string;
   description: string;
-  type: 'opensource' | 'school';
+  type: "opensource" | "school";
   technologies: string[];
   link?: string;
 }
 
-// Fetch all projects and filter by type
-export async function getProjects(type?: string | null): Promise<Project[]>{
-  if (type) {
-    const { rows } = await sql<Project>`SELECT * FROM projects WHERE type = ${type} ORDER BY id`;
+const ITEMS_PER_PAGE = 6;
+
+/**
+ * Validate and sanitize a search query.
+ *
+ * The URL is controlled by the user, so never trust
+ * searchParams directly.
+ */
+function sanitizeQuery(query: string): string {
+  return query
+    .trim()
+    .slice(0, 100)
+    .replace(/[^\p{L}\p{N}\s._-]/gu, "");
+}
+
+/**
+ * Validate the requested page number.
+ */
+function sanitizePage(page: number): number {
+  if (!Number.isInteger(page) || page < 1) {
+    return 1;
+  }
+
+  return page;
+}
+
+// Fetch all projects and optionally filter by type
+export async function getProjects(
+  type?: string | null
+): Promise<Project[]> {
+  if (type === "opensource" || type === "school") {
+    const { rows } = await sql<Project>`
+      SELECT *
+      FROM projects
+      WHERE type = ${type}
+      ORDER BY id
+    `;
+
     return rows;
   }
-  const { rows } = await sql<Project>`SELECT * FROM projects ORDER BY id`;
+
+  const { rows } = await sql<Project>`
+    SELECT *
+    FROM projects
+    ORDER BY id
+  `;
+
   return rows;
 }
 
 // Fetch a single project by its ID
-export async function getProjectById(id: number): Promise<Project | null> {
-  const { rows } = await sql<Project>`SELECT * FROM projects WHERE id = ${id}`;
+export async function getProjectById(
+  id: number
+): Promise<Project | null> {
+  if (!Number.isInteger(id) || id < 1) {
+    return null;
+  }
+
+  const { rows } = await sql<Project>`
+    SELECT *
+    FROM projects
+    WHERE id = ${id}
+  `;
+
   return rows[0] ?? null;
 }
 
-// export const projects: Project[] = [
-//   {
-//     id: 1,
-//     title: 'My First Open Source Contribution',
-//     description: 'A bug fix contributed to a popular library.',
-//     type: 'opensource',
-//     technologies: ['TypeScript', 'React'],
-//     link: 'https://github.com/nrb2002/wdd430-portfolio'
-//   },
-//   {
-//     id: 2,
-//     title: 'Database Design Final Project',
-//     description: 'An ER diagram and normalized schema for a library system.',
-//     type: 'school',
-//     technologies: ['PostgreSQL', 'SQL']
-//   },
+/**
+ * Fetch filtered and paginated projects.
+ *
+ * Searches title, description, type, and technologies.
+ */
+export async function fetchFilteredProjects(
+  query: string,
+  page: number
+): Promise<Project[]> {
+  const sanitizedQuery = sanitizeQuery(query);
+  const sanitizedPage = sanitizePage(page);
 
-//   {
-//     id: 3,
-//     title: 'TikCat Event Ticketing API',
-//     description: 'A RESTful API for managing events, venues, tickets, users, and orders using Node.js and MongoDB.',
-//     type: 'opensource',
-//     technologies: [
-//       'Node.js',
-//       'Express',
-//       'MongoDB',
-//       'Mongoose',
-//       'Swagger',
-//       'JWT',
-//     ],
-//     link: 'https://github.com/nrb2002/tikcat-api',
-//   },
-//   {
-//     id: 4,
-//     title: 'FountTechs API',
-//     description:
-//       'A RESTful API for managing a collection of technologies, allowing users to perform CRUD operations on technology data.',
-//     type: 'opensource',
-//     technologies: [
-//       'HTML',
-//       'CSS',
-//       'JavaScript',
-//       'Vite',
-//     ],
-//     link: 'https://github.com/nrb2002/FountTechs-API',
-//   },
-// ];
+  const offset =
+    (sanitizedPage - 1) * ITEMS_PER_PAGE;
 
+  const searchPattern = `%${sanitizedQuery}%`;
 
-// export function getProjects(type?: string | null): Project[] {
-//   if (type) return projects.filter(p => p.type === type);
-//   return projects;
-// }
+  const { rows } = await sql<Project>`
+    SELECT *
+    FROM projects
+    WHERE
+      title ILIKE ${searchPattern}
+      OR description ILIKE ${searchPattern}
+      OR type ILIKE ${searchPattern}
+      OR EXISTS (
+        SELECT 1
+        FROM unnest(technologies) AS technology
+        WHERE technology ILIKE ${searchPattern}
+      )
+    ORDER BY id
+    LIMIT ${ITEMS_PER_PAGE}
+    OFFSET ${offset}
+  `;
 
-// export function getProjectById(id: number): Project | null {
-//   return projects.find(p => p.id === id) ?? null;
-// }
+  return rows;
+}
+
+/**
+ * Count the total number of pages for filtered projects.
+ */
+export async function fetchProjectsPages(
+  query: string
+): Promise<number> {
+  const sanitizedQuery = sanitizeQuery(query);
+
+  const searchPattern = `%${sanitizedQuery}%`;
+
+  const { rows } = await sql<{ count: number }>`
+    SELECT COUNT(*)::int AS count
+    FROM projects
+    WHERE
+      title ILIKE ${searchPattern}
+      OR description ILIKE ${searchPattern}
+      OR type ILIKE ${searchPattern}
+      OR EXISTS (
+        SELECT 1
+        FROM unnest(technologies) AS technology
+        WHERE technology ILIKE ${searchPattern}
+      )
+  `;
+
+  return Math.ceil(
+    rows[0].count / ITEMS_PER_PAGE
+  );
+}
+
