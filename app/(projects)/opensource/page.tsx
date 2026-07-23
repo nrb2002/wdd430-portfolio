@@ -10,6 +10,9 @@ interface Project {
 }
 
 async function getOpenSourceProjects(): Promise<Project[]> {
+  //Temporary delay to simulate loading state
+  //await new Promise((resolve) => setTimeout(resolve, 2000));
+
   const res = await fetch(
     "http://localhost:3000/api/projects?type=opensource",
     {
