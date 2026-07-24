@@ -47,8 +47,8 @@ body {
     bottom: -180px;
     border-radius: 9999px;
 
-    background: rgba(119, 160, 231, 0.479);
-    border: 1px solid rgba(181, 213, 244, 0.45);
+    background: rgba(193, 213, 248, 0.479);
+    border: 1px solid rgba(219, 228, 237, 0.45);
 
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);

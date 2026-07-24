@@ -1,6 +1,7 @@
-// app/(projects)/page.tsx
+// app/(projects)/projects/page.tsx
 
 import ProjectSearch from "@/components/ProjectSearch";
+import ProjectFilters from "@/components/ProjectFilters";
 import Pagination from "@/components/Pagination";
 
 import {
@@ -11,6 +12,7 @@ import {
 interface ProjectsPageProps {
   searchParams: Promise<{
     query?: string;
+    type?: string;
     page?: string;
   }>;
 }
@@ -20,21 +22,34 @@ export default async function ProjectsPage({
 }: ProjectsPageProps) {
   const params = await searchParams;
 
+  // Get search query from URL
   const query = params.query ?? "";
 
+  // Validate project type from URL
+  const type =
+    params.type === "opensource" ||
+    params.type === "school"
+      ? params.type
+      : undefined;
+
+  // Validate page number from URL
   const page = Math.max(
     Number.parseInt(params.page ?? "1", 10) || 1,
     1
   );
 
-  const projects = await fetchFilteredProjects(
+  // Fetch filtered and paginated projects
+  const projects = await fetchFilteredProjects({
     query,
-    page
-  );
+    type,
+    page,
+  });
 
-  const totalPages = await fetchProjectsPages(
-    query
-  );
+  // Calculate total pages using the same filters
+  const totalPages = await fetchProjectsPages({
+    query,
+    type,
+  });
 
   return (
     <section>
@@ -46,8 +61,12 @@ export default async function ProjectsPage({
         Welcome to my projects page.
       </p>
 
-      {/* Search */}
-      <ProjectSearch />
+      {/* Search and Filters */}
+      <div className="mb-8 space-y-4">
+        <ProjectSearch />
+
+        <ProjectFilters />
+      </div>
 
       {/* Project Cards */}
       <div className="space-y-6">
@@ -88,9 +107,15 @@ export default async function ProjectsPage({
             </article>
           ))
         ) : (
-          <p className="py-8 text-center text-gray-500">
-            No projects found.
-          </p>
+          <div className="rounded-lg border border-dashed p-8 text-center">
+            <h3 className="text-lg font-semibold">
+              No projects found
+            </h3>
+
+            <p className="mt-2 text-gray-500">
+              Try changing your search or filter.
+            </p>
+          </div>
         )}
       </div>
 
@@ -99,3 +124,4 @@ export default async function ProjectsPage({
     </section>
   );
 }
+

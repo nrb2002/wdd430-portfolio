@@ -11,13 +11,19 @@ export interface Project {
   link?: string;
 }
 
+export interface ProjectFilters {
+  query: string;
+  type?: "opensource" | "school";
+  page: number;
+}
+
 const ITEMS_PER_PAGE = 6;
 
 /**
  * Validate and sanitize a search query.
  *
- * The URL is controlled by the user, so never trust
- * searchParams directly.
+ * URL parameters are controlled by the user,
+ * so never trust searchParams directly.
  */
 function sanitizeQuery(query: string): string {
   return query
@@ -37,15 +43,32 @@ function sanitizePage(page: number): number {
   return page;
 }
 
-// Fetch all projects and optionally filter by type
+/**
+ * Validate the project type filter.
+ */
+function sanitizeProjectType(
+  type?: string | null
+): "opensource" | "school" | undefined {
+  if (type === "opensource" || type === "school") {
+    return type;
+  }
+
+  return undefined;
+}
+
+/**
+ * Fetch all projects and optionally filter by type.
+ */
 export async function getProjects(
   type?: string | null
 ): Promise<Project[]> {
-  if (type === "opensource" || type === "school") {
+  const sanitizedType = sanitizeProjectType(type);
+
+  if (sanitizedType) {
     const { rows } = await sql<Project>`
-      SELECT *
+      SELECT * 
       FROM projects
-      WHERE type = ${type}
+      WHERE type = ${sanitizedType}
       ORDER BY id
     `;
 
@@ -61,7 +84,9 @@ export async function getProjects(
   return rows;
 }
 
-// Fetch a single project by its ID
+/**
+ * Fetch a single project by its ID.
+ */
 export async function getProjectById(
   id: number
 ): Promise<Project | null> {
@@ -81,19 +106,51 @@ export async function getProjectById(
 /**
  * Fetch filtered and paginated projects.
  *
- * Searches title, description, type, and technologies.
+ * Searches:
+ * - title
+ * - description
+ * - type
+ * - technologies
+ *
+ * Also supports filtering by project type.
  */
-export async function fetchFilteredProjects(
-  query: string,
-  page: number
-): Promise<Project[]> {
+export async function fetchFilteredProjects({
+  query,
+  type,
+  page,
+}: ProjectFilters): Promise<Project[]> {
   const sanitizedQuery = sanitizeQuery(query);
+  const sanitizedType = sanitizeProjectType(type);
   const sanitizedPage = sanitizePage(page);
 
   const offset =
     (sanitizedPage - 1) * ITEMS_PER_PAGE;
 
   const searchPattern = `%${sanitizedQuery}%`;
+
+  if (sanitizedType) {
+    const { rows } = await sql<Project>`
+      SELECT *
+      FROM projects
+      WHERE
+        type = ${sanitizedType}
+        AND (
+          title ILIKE ${searchPattern}
+          OR description ILIKE ${searchPattern}
+          OR type ILIKE ${searchPattern}
+          OR EXISTS (
+            SELECT 1
+            FROM unnest(technologies) AS technology
+            WHERE technology ILIKE ${searchPattern}
+          )
+        )
+      ORDER BY id
+      LIMIT ${ITEMS_PER_PAGE}
+      OFFSET ${offset}
+    `;
+
+    return rows;
+  }
 
   const { rows } = await sql<Project>`
     SELECT *
@@ -116,31 +173,64 @@ export async function fetchFilteredProjects(
 }
 
 /**
- * Count the total number of pages for filtered projects.
+ * Count total pages for filtered projects.
+ *
+ * Uses the same search and type filters
+ * as fetchFilteredProjects().
  */
-export async function fetchProjectsPages(
-  query: string
-): Promise<number> {
+export async function fetchProjectsPages({
+  query,
+  type,
+}: {
+  query: string;
+  type?: "opensource" | "school";
+}): Promise<number> {
   const sanitizedQuery = sanitizeQuery(query);
+  const sanitizedType = sanitizeProjectType(type);
 
   const searchPattern = `%${sanitizedQuery}%`;
 
-  const { rows } = await sql<{ count: number }>`
-    SELECT COUNT(*)::int AS count
-    FROM projects
-    WHERE
-      title ILIKE ${searchPattern}
-      OR description ILIKE ${searchPattern}
-      OR type ILIKE ${searchPattern}
-      OR EXISTS (
-        SELECT 1
-        FROM unnest(technologies) AS technology
-        WHERE technology ILIKE ${searchPattern}
-      )
-  `;
+  let count: number;
+
+  if (sanitizedType) {
+    const { rows } = await sql<{ count: number }>`
+      SELECT COUNT(*)::int AS count
+      FROM projects
+      WHERE
+        type = ${sanitizedType}
+        AND (
+          title ILIKE ${searchPattern}
+          OR description ILIKE ${searchPattern}
+          OR type ILIKE ${searchPattern}
+          OR EXISTS (
+            SELECT 1
+            FROM unnest(technologies) AS technology
+            WHERE technology ILIKE ${searchPattern}
+          )
+        )
+    `;
+
+    count = rows[0].count;
+  } else {
+    const { rows } = await sql<{ count: number }>`
+      SELECT COUNT(*)::int AS count
+      FROM projects
+      WHERE
+        title ILIKE ${searchPattern}
+        OR description ILIKE ${searchPattern}
+        OR type ILIKE ${searchPattern}
+        OR EXISTS (
+          SELECT 1
+          FROM unnest(technologies) AS technology
+          WHERE technology ILIKE ${searchPattern}
+        )
+    `;
+
+    count = rows[0].count;
+  }
 
   return Math.ceil(
-    rows[0].count / ITEMS_PER_PAGE
+    count / ITEMS_PER_PAGE
   );
 }
 
