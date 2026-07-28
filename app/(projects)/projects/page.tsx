@@ -1,8 +1,12 @@
 // app/(projects)/projects/page.tsx
 
+import Link from "next/link";
+
 import ProjectSearch from "@/components/ProjectSearch";
 import ProjectFilters from "@/components/ProjectFilters";
 import Pagination from "@/components/Pagination";
+
+import { deleteProject } from "@/lib/actions";
 
 import {
   fetchFilteredProjects,
@@ -53,13 +57,25 @@ export default async function ProjectsPage({
 
   return (
     <section>
-      <h2 className="mb-4 text-3xl font-bold">
-        All Projects
-      </h2>
+      {/* Page Header */}
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-3xl font-bold">
+            All Projects
+          </h2>
 
-      <p className="mb-6">
-        Welcome to my projects page.
-      </p>
+          <p className="mt-2">
+            Welcome to my projects page.
+          </p>
+        </div>
+
+        <Link
+          href="/projects/create"
+          className="inline-block rounded-lg bg-[#0B2545] px-5 py-3 text-center text-white hover:bg-[#081C33]"
+        >
+          Add New Project
+        </Link>
+      </div>
 
       {/* Search and Filters */}
       <div className="mb-8 space-y-4">
@@ -104,6 +120,30 @@ export default async function ProjectsPage({
                   View Project
                 </a>
               )}
+
+              {/* Edit and Delete Actions */}
+              <div className="mt-4 flex gap-3">
+                <Link
+                  href={`/projects/${project.id}/edit`}
+                  className="rounded-lg border bg-[#0B2545] px-4 py-2 hover:bg-[#081C33] text-white"
+                >
+                  Edit
+                </Link>
+
+                <form
+                  action={deleteProject.bind(
+                    null,
+                    project.id.toString()
+                  )}
+                >
+                  <button
+                    type="submit"
+                    className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                </form>
+              </div>
             </article>
           ))
         ) : (
@@ -124,4 +164,3 @@ export default async function ProjectsPage({
     </section>
   );
 }
-
