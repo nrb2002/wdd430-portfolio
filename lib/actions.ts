@@ -36,136 +36,145 @@ const ProjectFormSchema = z.object({
     .or(z.literal("")),
 });
 
-export async function createProject(
-  formData: FormData
-) {
-  const raw = {
-    title: formData.get("title"),
-    description: formData.get("description"),
-    type: formData.get("type"),
-    technologies: formData.get("technologies"),
-    link: formData.get("link"),
-  };
+export async function createProject(formData: FormData) {
+  try{
+    const raw = {
+      title: formData.get("title"),
+      description: formData.get("description"),
+      type: formData.get("type"),
+      technologies: formData.get("technologies"),
+      link: formData.get("link"),
+    };
 
-  const parsed =
-    ProjectFormSchema.safeParse(raw);
+    const parsed =
+      ProjectFormSchema.safeParse(raw);
 
-  if (!parsed.success) {
-    throw new Error(
-      "Invalid project input."
-    );
-  }
+    if (!parsed.success) {
+      throw new Error(
+        "Invalid project input."
+      );
+    }
 
-  const {
-    title,
-    description,
-    type,
-    technologies,
-    link,
-  } = parsed.data;
-
-  const technologyArray = technologies
-    .split(",")
-    .map((technology) => technology.trim())
-    .filter(Boolean);
-
-  await sql`
-    INSERT INTO projects (
+    const {
       title,
       description,
       type,
       technologies,
-      link
-    )
-    VALUES (
-      ${title},
-      ${description},
-      ${type},
-      ${technologyArray},
-      ${link || null}
-    )
-  `;
+      link,
+    } = parsed.data;
+
+    const technologyArray = technologies
+      .split(",")
+      .map((technology) => technology.trim())
+      .filter(Boolean);
+
+    await sql`
+      INSERT INTO projects (
+        title,
+        description,
+        type,
+        technologies,
+        link
+      )
+      VALUES (
+        ${title},
+        ${description},
+        ${type},
+        ${technologyArray},
+        ${link || null}
+      )
+    `;
+
+  } catch(error){
+    console.error('Error creating new project:', error);
+    throw new Error('Unable to create project. Please try again later.');
+  }
 
   revalidatePath("/projects");
-
   redirect("/projects");
 }
 
-export async function updateProject(
-  id: string,
-  formData: FormData
-) {
-  const projectId = Number(id);
+export async function updateProject(id: string, formData: FormData) {
+  try{
+    const projectId = Number(id);
 
-  if (
-    !Number.isInteger(projectId) ||
-    projectId < 1
-  ) {
-    throw new Error("Invalid project ID.");
+    if (
+      !Number.isInteger(projectId) ||
+      projectId < 1
+    ) {
+      throw new Error("Invalid project ID.");
+    }
+
+    const raw = {
+      title: formData.get("title"),
+      description: formData.get("description"),
+      type: formData.get("type"),
+      technologies: formData.get("technologies"),
+      link: formData.get("link"),
+    };
+
+    const parsed =
+      ProjectFormSchema.safeParse(raw);
+
+    if (!parsed.success) {
+      throw new Error(
+        "Invalid project input."
+      );
+    }
+
+    const {
+      title,
+      description,
+      type,
+      technologies,
+      link,
+    } = parsed.data;
+
+    const technologyArray = technologies
+      .split(",")
+      .map((technology) => technology.trim())
+      .filter(Boolean);
+
+    await sql`
+      UPDATE projects
+      SET
+        title = ${title},
+        description = ${description},
+        type = ${type},
+        technologies = ${technologyArray},
+        link = ${link || null}
+      WHERE id = ${projectId}
+    `;
+
+  }catch(error){
+    console.error('Error updating project:', error);
+    throw new Error('Unable to update project. Please try again later.');
   }
-
-  const raw = {
-    title: formData.get("title"),
-    description: formData.get("description"),
-    type: formData.get("type"),
-    technologies: formData.get("technologies"),
-    link: formData.get("link"),
-  };
-
-  const parsed =
-    ProjectFormSchema.safeParse(raw);
-
-  if (!parsed.success) {
-    throw new Error(
-      "Invalid project input."
-    );
-  }
-
-  const {
-    title,
-    description,
-    type,
-    technologies,
-    link,
-  } = parsed.data;
-
-  const technologyArray = technologies
-    .split(",")
-    .map((technology) => technology.trim())
-    .filter(Boolean);
-
-  await sql`
-    UPDATE projects
-    SET
-      title = ${title},
-      description = ${description},
-      type = ${type},
-      technologies = ${technologyArray},
-      link = ${link || null}
-    WHERE id = ${projectId}
-  `;
 
   revalidatePath("/projects");
-
   redirect("/projects");
 }
 
-export async function deleteProject(
-  id: string
-) {
-  const projectId = Number(id);
+export async function deleteProject(id: string) {
+  try{
+    const projectId = Number(id);
 
-  if (
-    !Number.isInteger(projectId) ||
-    projectId < 1
-  ) {
-    throw new Error("Invalid project ID.");
+    if (
+      !Number.isInteger(projectId) ||
+      projectId < 1
+    ) {
+      throw new Error("Invalid project ID.");
+    }
+
+    await sql`
+      DELETE FROM projects
+      WHERE id = ${projectId}
+    `;
+
+  }catch(error){
+    console.error('Error deleting project:', error);
+    throw new Error('Unable to delete project. Please try again later.');
   }
-
-  await sql`
-    DELETE FROM projects
-    WHERE id = ${projectId}
-  `;
 
   revalidatePath("/projects");
 
