@@ -1,22 +1,14 @@
-
 // app/(projects)/school/page.tsx
 
 import { Suspense } from "react";
 
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  type: "opensource" | "school";
-  technologies: string[];
-  link?: string;
-}
+import { getProjects } from "@/lib/projects-db";
 
 // Skeleton shown while SchoolProjectList is loading
 function SchoolProjectListSkeleton() {
   return (
     <div className="space-y-6">
-      {[1, 2].map((item) => (
+      {[1, 2, 3].map((item) => (
         <article
           key={item}
           className="rounded-lg border p-4 shadow-sm"
@@ -33,7 +25,7 @@ function SchoolProjectListSkeleton() {
           {/* Technologies */}
           <div className="mt-4 h-4 w-3/4 animate-pulse rounded bg-gray-200" />
 
-          {/* Link */}
+          {/* View Project link */}
           <div className="mt-4 h-5 w-28 animate-pulse rounded bg-gray-200" />
         </article>
       ))}
@@ -41,61 +33,58 @@ function SchoolProjectListSkeleton() {
   );
 }
 
-// Fetch school projects
-async function getSchoolProjects(): Promise<Project[]> {
+// Async Server Component
+async function SchoolProjectList() {
   // Temporary delay for testing Suspense
   // await new Promise((res) => setTimeout(res, 2000));
 
-  const res = await fetch(
-    "http://localhost:3000/api/projects?type=school",
-    {
-      cache: "no-store",
-    }
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch school projects");
-  }
-
-  return res.json();
-}
-
-// Async Server Component
-async function SchoolProjectList() {
-  const projects = await getSchoolProjects();
+  const projects = await getProjects("school");
 
   return (
     <div className="space-y-6">
-      {projects.map((project) => (
-        <article
-          key={project.id}
-          className="rounded-lg border p-4 shadow-sm"
-        >
-          <h3 className="text-xl font-semibold">
-            {project.title}
+      {projects.length > 0 ? (
+        projects.map((project) => (
+          <article
+            key={project.id}
+            className="rounded-lg border p-4 shadow-sm"
+          >
+            <h3 className="text-xl font-semibold">
+              {project.title}
+            </h3>
+
+            <p className="mt-2">
+              {project.description}
+            </p>
+
+            <p className="mt-2">
+              <strong>Technologies:</strong>{" "}
+              {project.technologies.join(", ")}
+            </p>
+
+            {project.link && (
+              <a
+                href={project.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block text-blue-600 hover:underline"
+              >
+                View Project
+              </a>
+            )}
+          </article>
+        ))
+      ) : (
+        <div className="rounded-lg border border-dashed p-8 text-center">
+          <h3 className="text-lg font-semibold">
+            No School Projects Found
           </h3>
 
-          <p className="mt-2">
-            {project.description}
+          <p className="mt-2 text-gray-500">
+            There are currently no school projects
+            to display.
           </p>
-
-          <p className="mt-2">
-            <strong>Technologies:</strong>{" "}
-            {project.technologies.join(", ")}
-          </p>
-
-          {project.link && (
-            <a
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 inline-block text-blue-600 hover:underline"
-            >
-              View Project
-            </a>
-          )}
-        </article>
-      ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -116,6 +105,3 @@ export default function SchoolProjectsPage() {
     </section>
   );
 }
-
-
-

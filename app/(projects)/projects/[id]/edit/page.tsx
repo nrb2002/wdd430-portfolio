@@ -38,8 +38,7 @@ export default async function EditProjectPage({
     );
   }
 
-  const project =
-    await getProjectById(projectId);
+  const project = await getProjectById(projectId);
 
   if (!project) {
     return (
@@ -88,8 +87,17 @@ export default async function EditProjectPage({
             type="text"
             defaultValue={project.title}
             required
-            className="w-full rounded-lg border p-3"
+            aria-invalid={false}
+            aria-describedby="title-error"
+            className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-[#0B2545]"
           />
+
+          <div aria-live="polite">
+            <p
+              id="title-error"
+              className="mt-1 text-sm text-red-600"
+            />
+          </div>
         </div>
 
         {/* Description */}
@@ -107,8 +115,17 @@ export default async function EditProjectPage({
             rows={5}
             defaultValue={project.description}
             required
-            className="w-full rounded-lg border p-3"
+            aria-invalid={false}
+            aria-describedby="description-error"
+            className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-[#0B2545]"
           />
+
+          <div aria-live="polite">
+            <p
+              id="description-error"
+              className="mt-1 text-sm text-red-600"
+            />
+          </div>
         </div>
 
         {/* Project Type */}
@@ -125,7 +142,9 @@ export default async function EditProjectPage({
             name="type"
             defaultValue={project.type}
             required
-            className="w-full rounded-lg border p-3"
+            aria-invalid={false}
+            aria-describedby="type-error"
+            className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-[#0B2545]"
           >
             <option value="opensource">
               Open Source
@@ -135,6 +154,13 @@ export default async function EditProjectPage({
               School
             </option>
           </select>
+
+          <div aria-live="polite">
+            <p
+              id="type-error"
+              className="mt-1 text-sm text-red-600"
+            />
+          </div>
         </div>
 
         {/* Technologies */}
@@ -152,12 +178,24 @@ export default async function EditProjectPage({
             type="text"
             defaultValue={project.technologies.join(", ")}
             required
-            className="w-full rounded-lg border p-3"
+            aria-invalid={false}
+            aria-describedby="technologies-help technologies-error"
+            className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-[#0B2545]"
           />
 
-          <p className="mt-1 text-sm text-gray-500">
+          <p
+            id="technologies-help"
+            className="mt-1 text-sm text-gray-500"
+          >
             Separate technologies with commas.
           </p>
+
+          <div aria-live="polite">
+            <p
+              id="technologies-error"
+              className="text-sm text-red-600"
+            />
+          </div>
         </div>
 
         {/* Project Link */}
@@ -175,19 +213,31 @@ export default async function EditProjectPage({
             type="url"
             defaultValue={project.link ?? ""}
             placeholder="https://github.com/username/project"
-            className="w-full rounded-lg border p-3"
+            aria-invalid={false}
+            aria-describedby="link-help link-error"
+            className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-[#0B2545]"
           />
 
-          <p className="mt-1 text-sm text-gray-500">
-            Optional. Add the GitHub repository or live
-            project URL.
+          <p
+            id="link-help"
+            className="mt-1 text-sm text-gray-500"
+          >
+            Optional. Add the GitHub repository or
+            live project URL.
           </p>
+
+          <div aria-live="polite">
+            <p
+              id="link-error"
+              className="text-sm text-red-600"
+            />
+          </div>
         </div>
 
         {/* Submit */}
         <button
           type="submit"
-          className="rounded-lg bg-[#0B2545] px-6 py-3 text-white hover:bg-[#081C33]"
+          className="rounded-lg bg-[#0B2545] px-6 py-3 text-white hover:bg-[#081C33] focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:ring-offset-2"
         >
           Update Project
         </button>

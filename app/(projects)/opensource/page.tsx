@@ -1,70 +1,71 @@
-// app/projects/opensource/page.tsx
+// app/(projects)/opensource/page.tsx
 
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  type: "opensource" | "school";
-  technologies: string[];
-  link?: string;
-}
+import Link from "next/link";
 
-async function getOpenSourceProjects(): Promise<Project[]> {
-  //Temporary delay to simulate loading state
-  //await new Promise((resolve) => setTimeout(resolve, 2000));
-
-  const res = await fetch(
-    "http://localhost:3000/api/projects?type=opensource",
-    {
-      cache: "no-store",
-    }
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch open source projects");
-  }
-
-  return res.json();
-}
+import { getProjects } from "@/lib/projects-db";
 
 export default async function OpenSourcePage() {
-  const projects = await getOpenSourceProjects();
+  const projects = await getProjects("opensource");
 
   return (
     <section>
-      <h2 className="text-3xl font-bold mb-4">
-        Open Source Projects
-      </h2>
+      {/* Page Header */}
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold">
+          Open Source Projects
+        </h2>
 
+        <p className="mt-2">
+          Explore my open source projects and
+          contributions.
+        </p>
+      </div>
+
+      {/* Project Cards */}
       <div className="space-y-6">
-        {projects.map((project) => (
-          <article
-            key={project.id}
-            className="border rounded-lg p-4 shadow-sm"
-          >
-            <h3 className="text-xl font-semibold">
-              {project.title}
+        {projects.length > 0 ? (
+          projects.map((project) => (
+            <article
+              key={project.id}
+              className="rounded-lg border p-4 shadow-sm"
+            >
+              <h3 className="text-xl font-semibold">
+                {project.title}
+              </h3>
+
+              <p className="mt-2">
+                {project.description}
+              </p>
+
+              <p className="mt-2">
+                <strong>Technologies:</strong>{" "}
+                {project.technologies.join(", ")}
+              </p>
+
+              {project.link && (
+                <Link
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-block text-blue-600 hover:underline"
+                >
+                  View Project
+                </Link>
+              )}
+            </article>
+          ))
+        ) : (
+          <div className="rounded-lg border border-dashed p-8 text-center">
+            <h3 className="text-lg font-semibold">
+              No Open Source Projects Found
             </h3>
 
-            <p className="mt-2">{project.description}</p>
-
-            <p className="mt-2">
-              <strong>Technologies:</strong>{" "}
-              {project.technologies.join(", ")}
+            <p className="mt-2 text-gray-500">
+              There are currently no open source projects
+              to display.
             </p>
-
-            {project.link && (
-              <a
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline mt-2 inline-block"
-              >
-                View Project
-              </a>
-            )}
-          </article>
-        ))}
+          </div>
+        )}
       </div>
     </section>
   );

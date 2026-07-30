@@ -7,18 +7,17 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+//Zod Schema
 const ProjectFormSchema = z.object({
   title: z
     .string()
     .trim()
-    .min(2, "Title must be at least 2 characters.")
-    .max(100, "Title is too long."),
+    .min(2, "Title must be at least 2 characters."),
 
   description: z
     .string()
     .trim()
-    .min(10, "Description must be at least 10 characters.")
-    .max(1000, "Description is too long."),
+    .min(10, "Description must be at least 10 characters."),
 
   type: z.enum(["opensource", "school"]),
 
@@ -27,7 +26,15 @@ const ProjectFormSchema = z.object({
     .trim()
     .min(2, "Please enter at least one technology."),
 
-  // Optional project URL
+  yearCompleted: z.coerce
+    .number()
+    .int()
+    .min(2000, "Year must be 2000 or later.")
+    .max(
+      new Date().getFullYear(),
+      "Year cannot be in the future."
+    ),
+
   link: z
     .string()
     .trim()
@@ -36,44 +43,52 @@ const ProjectFormSchema = z.object({
     .or(z.literal("")),
 });
 
-export async function createProject(formData: FormData) {
-  try{
-    const raw = {
-      title: formData.get("title"),
-      description: formData.get("description"),
-      type: formData.get("type"),
-      technologies: formData.get("technologies"),
-      link: formData.get("link"),
+import { FormState } from "@/types/form";
+
+export async function createProject(
+  prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const raw = {
+    title: formData.get("title"),
+    description: formData.get("description"),
+    type: formData.get("type"),
+    technologies: formData.get("technologies"),
+    yearCompleted: formData.get("yearCompleted"),
+    link: formData.get("link"),
+  };
+
+  const parsed = ProjectFormSchema.safeParse(raw);
+
+  if (!parsed.success) {
+    return {
+      message: "Please correct the errors below.",
+      errors: parsed.error.flatten().fieldErrors,
     };
+  }
 
-    const parsed =
-      ProjectFormSchema.safeParse(raw);
+  const {
+    title,
+    description,
+    type,
+    technologies,
+    yearCompleted,
+    link,
+  } = parsed.data;
 
-    if (!parsed.success) {
-      throw new Error(
-        "Invalid project input."
-      );
-    }
+  const technologyArray = technologies
+    .split(",")
+    .map((technology) => technology.trim())
+    .filter(Boolean);
 
-    const {
-      title,
-      description,
-      type,
-      technologies,
-      link,
-    } = parsed.data;
-
-    const technologyArray = technologies
-      .split(",")
-      .map((technology) => technology.trim())
-      .filter(Boolean);
-
+  try {
     await sql`
       INSERT INTO projects (
         title,
         description,
         type,
         technologies,
+        year_completed,
         link
       )
       VALUES (
@@ -81,13 +96,17 @@ export async function createProject(formData: FormData) {
         ${description},
         ${type},
         ${technologyArray},
+        ${yearCompleted},
         ${link || null}
       )
     `;
+  } catch (error) {
+    console.error("Error creating project:", error);
 
-  } catch(error){
-    console.error('Error creating new project:', error);
-    throw new Error('Unable to create project. Please try again later.');
+    return {
+      message:
+        "Unable to create project. Please try again later.",
+    };
   }
 
   revalidatePath("/projects");
