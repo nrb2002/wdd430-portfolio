@@ -1,22 +1,85 @@
+// components/ProjectCard.tsx
+
+import Link from "next/link";
+
+import { deleteProject } from "@/lib/actions";
+import { Project } from "@/lib/projects-db";
+
 interface ProjectCardProps {
-  title: string;
-  description: string;
-  technologies: string[];
-  link?: string;
+  project: Project;
+  showActions?: boolean;
 }
-        
-export default function ProjectCard({title, description, technologies, link}: ProjectCardProps) {
+
+export default function ProjectCard({
+  project,
+  showActions = false,
+}: ProjectCardProps) {
   return (
-    <article className="p-4 border-l-4 border-primary bg-gray-50 rounded">
-      <h3 className="text-xl font-bold mb-2">{title}</h3>
-      <p className="text-gray-700 mb-3">{description}</p>
-      <p className="text-sm text-gray-600">
-        <strong>Technologies:</strong> {technologies.join(', ')}
+    <article className="rounded-lg border p-4 shadow-sm">
+      {/* Project Title */}
+      <h3 className="text-xl font-semibold">
+        {project.title}
+      </h3>
+
+      {/* Description */}
+      <p className="mt-2">
+        {project.description}
       </p>
-      {link && (
-        <p className="mt-2">
-          <a href={link} target="_blank" rel="noopener noreferrer" className="text-accent-dark hover:underline">View Project</a>
-        </p>
+
+      {/* Project Type */}
+      <p className="mt-2">
+        <strong>Type:</strong>{" "}
+        {project.type}
+      </p>
+
+      {/* Year Completed */}
+      <p className="mt-2">
+        <strong>Year Completed:</strong>{" "}
+        {project.yearCompleted}
+      </p>
+
+      {/* Technologies */}
+      <p className="mt-2">
+        <strong>Technologies:</strong>{" "}
+        {project.technologies.join(", ")}
+      </p>
+
+      {/* Project Link */}
+      {project.link && (
+        <a
+          href={project.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-block text-blue-600 hover:underline"
+        >
+          View Project
+        </a>
+      )}
+
+      {/* Edit and Delete Actions */}
+      {showActions && (
+        <div className="mt-4 flex gap-3">
+          <Link
+            href={`/projects/${project.id}/edit`}
+            className="rounded-lg border bg-[#0B2545] px-4 py-2 text-white hover:bg-[#081C33]"
+          >
+            Edit
+          </Link>
+
+          <form
+            action={deleteProject.bind(
+              null,
+              project.id.toString()
+            )}
+          >
+            <button
+              type="submit"
+              className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+            >
+              Delete
+            </button>
+          </form>
+        </div>
       )}
     </article>
   );

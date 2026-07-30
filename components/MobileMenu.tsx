@@ -114,7 +114,7 @@ export default function MobileMenu() {
                   </Link>
 
                   <Link
-                    href="/opensource"
+                    href="/projects/opensource"
                     onClick={() => setIsOpen(false)}
                     className="rounded-lg px-4 py-2 text-white hover:bg-[#081C33]"
                   >
@@ -122,7 +122,7 @@ export default function MobileMenu() {
                   </Link>
 
                   <Link
-                    href="/school"
+                    href="/projects/school"
                     onClick={() => setIsOpen(false)}
                     className="rounded-lg px-4 py-2 text-white hover:bg-[#081C33]"
                   >

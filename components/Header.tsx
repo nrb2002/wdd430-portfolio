@@ -49,14 +49,14 @@ export default function Header() {
                   </Link>
 
                   <Link
-                    href="/opensource"
+                    href="/projects/opensource"
                     className="block rounded-lg px-4 py-2 text-white hover:bg-[#081C33]"
                   >
                     Open Source
                   </Link>
 
                   <Link
-                    href="/school"
+                    href="/projects/school"
                     className="block rounded-lg px-4 py-2 text-white hover:bg-[#081C33]"
                   >
                     School Projects

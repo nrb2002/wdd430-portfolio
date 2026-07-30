@@ -7,6 +7,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { FormState } from "@/types/form"
+
 //Zod Schema
 const ProjectFormSchema = z.object({
   title: z
@@ -43,12 +45,11 @@ const ProjectFormSchema = z.object({
     .or(z.literal("")),
 });
 
-import { FormState } from "@/types/form";
-
 export async function createProject(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  //Get values from FormData
   const raw = {
     title: formData.get("title"),
     description: formData.get("description"),
@@ -57,6 +58,8 @@ export async function createProject(
     yearCompleted: formData.get("yearCompleted"),
     link: formData.get("link"),
   };
+
+  // Validate form data
 
   const parsed = ProjectFormSchema.safeParse(raw);
 
@@ -76,6 +79,7 @@ export async function createProject(
     link,
   } = parsed.data;
 
+  // Convert comma-separated technologies into a PostgreSQL text array
   const technologyArray = technologies
     .split(",")
     .map((technology) => technology.trim())
@@ -109,11 +113,18 @@ export async function createProject(
     };
   }
 
+  // Refresh the projects page
   revalidatePath("/projects");
+
+  // Redirect after successful creation
   redirect("/projects");
 }
 
-export async function updateProject(id: string, formData: FormData) {
+export async function updateProject(
+  id: string, 
+  prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
   try{
     const projectId = Number(id);
 
@@ -129,16 +140,17 @@ export async function updateProject(id: string, formData: FormData) {
       description: formData.get("description"),
       type: formData.get("type"),
       technologies: formData.get("technologies"),
+      yearCompleted: formData.get("yearCompleted"),
       link: formData.get("link"),
     };
 
     const parsed =
       ProjectFormSchema.safeParse(raw);
 
-    if (!parsed.success) {
-      throw new Error(
-        "Invalid project input."
-      );
+    if (!parsed.success) { 
+      return { 
+        message: "Please correct the errors below.", errors: parsed.error.flatten().fieldErrors, 
+      }; 
     }
 
     const {
@@ -146,6 +158,7 @@ export async function updateProject(id: string, formData: FormData) {
       description,
       type,
       technologies,
+      yearCompleted,
       link,
     } = parsed.data;
 
@@ -161,6 +174,7 @@ export async function updateProject(id: string, formData: FormData) {
         description = ${description},
         type = ${type},
         technologies = ${technologyArray},
+        year_completed = ${yearCompleted},
         link = ${link || null}
       WHERE id = ${projectId}
     `;

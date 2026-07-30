@@ -1,3 +1,5 @@
+// lib/types/form.ts
+
 export interface FormState {
   message: string | null;
   errors?: {

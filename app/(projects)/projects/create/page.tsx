@@ -1,8 +1,28 @@
 // app/(projects)/projects/create/page.tsx
 
+"use client";
+
+import { useActionState } from "react";
 import { createProject } from "@/lib/actions";
 
+const initialState = {
+  message: "",
+  errors: {
+    title: [],
+    description: [],
+    type: [],
+    technologies: [],
+    yearCompleted: [],
+    link: [],
+  },
+};
+
 export default function CreateProjectPage() {
+  const [state, formAction] = useActionState(
+    createProject,
+    initialState
+  );
+
   return (
     <section>
       <h2 className="mb-6 text-3xl font-bold">
@@ -10,9 +30,20 @@ export default function CreateProjectPage() {
       </h2>
 
       <form
-        action={createProject}
+        action={formAction}
         className="max-w-2xl space-y-6"
       >
+        {/* General Error Message */}
+        {state.message && (
+          <div
+            role="alert"
+            aria-live="polite"
+            className="rounded-lg border border-red-300 bg-red-50 p-4 text-red-700"
+          >
+            {state.message}
+          </div>
+        )}
+
         {/* Project Title */}
         <div>
           <label
@@ -27,16 +58,27 @@ export default function CreateProjectPage() {
             name="title"
             type="text"
             required
-            aria-invalid={false}
+            aria-invalid={Boolean(
+              state.errors?.title?.length
+            )}
             aria-describedby="title-error"
-            className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-[#0B2545]"
+            className="w-full rounded-lg border p-3 focus:border-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#0B2545]"
           />
 
-          <div aria-live="polite">
-            <p
-              id="title-error"
-              className="mt-1 text-sm text-red-600"
-            />
+          <div
+            id="title-error"
+            aria-live="polite"
+          >
+            {state.errors?.title?.map(
+              (error: string) => (
+                <p
+                  key={error}
+                  className="mt-1 text-sm text-red-600"
+                >
+                  {error}
+                </p>
+              )
+            )}
           </div>
         </div>
 
@@ -54,16 +96,27 @@ export default function CreateProjectPage() {
             name="description"
             rows={5}
             required
-            aria-invalid={false}
+            aria-invalid={Boolean(
+              state.errors?.description?.length
+            )}
             aria-describedby="description-error"
-            className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-[#0B2545]"
+            className="w-full rounded-lg border p-3 focus:border-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#0B2545]"
           />
 
-          <div aria-live="polite">
-            <p
-              id="description-error"
-              className="mt-1 text-sm text-red-600"
-            />
+          <div
+            id="description-error"
+            aria-live="polite"
+          >
+            {state.errors?.description?.map(
+              (error: string) => (
+                <p
+                  key={error}
+                  className="mt-1 text-sm text-red-600"
+                >
+                  {error}
+                </p>
+              )
+            )}
           </div>
         </div>
 
@@ -80,9 +133,11 @@ export default function CreateProjectPage() {
             id="type"
             name="type"
             required
-            aria-invalid={false}
+            aria-invalid={Boolean(
+              state.errors?.type?.length
+            )}
             aria-describedby="type-error"
-            className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-[#0B2545]"
+            className="w-full rounded-lg border p-3 focus:border-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#0B2545]"
           >
             <option value="opensource">
               Open Source
@@ -93,11 +148,20 @@ export default function CreateProjectPage() {
             </option>
           </select>
 
-          <div aria-live="polite">
-            <p
-              id="type-error"
-              className="mt-1 text-sm text-red-600"
-            />
+          <div
+            id="type-error"
+            aria-live="polite"
+          >
+            {state.errors?.type?.map(
+              (error: string) => (
+                <p
+                  key={error}
+                  className="mt-1 text-sm text-red-600"
+                >
+                  {error}
+                </p>
+              )
+            )}
           </div>
         </div>
 
@@ -116,9 +180,11 @@ export default function CreateProjectPage() {
             type="text"
             placeholder="Next.js, React, PostgreSQL"
             required
-            aria-invalid={false}
+            aria-invalid={Boolean(
+              state.errors?.technologies?.length
+            )}
             aria-describedby="technologies-help technologies-error"
-            className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-[#0B2545]"
+            className="w-full rounded-lg border p-3 focus:border-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#0B2545]"
           />
 
           <p
@@ -128,11 +194,20 @@ export default function CreateProjectPage() {
             Separate technologies with commas.
           </p>
 
-          <div aria-live="polite">
-            <p
-              id="technologies-error"
-              className="text-sm text-red-600"
-            />
+          <div
+            id="technologies-error"
+            aria-live="polite"
+          >
+            {state.errors?.technologies?.map(
+              (error: string) => (
+                <p
+                  key={error}
+                  className="text-sm text-red-600"
+                >
+                  {error}
+                </p>
+              )
+            )}
           </div>
         </div>
 
@@ -150,9 +225,11 @@ export default function CreateProjectPage() {
             name="link"
             type="url"
             placeholder="https://github.com/username/project"
-            aria-invalid={false}
+            aria-invalid={Boolean(
+              state.errors?.link?.length
+            )}
             aria-describedby="link-help link-error"
-            className="w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-[#0B2545]"
+            className="w-full rounded-lg border p-3 focus:border-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#0B2545]"
           />
 
           <p
@@ -163,11 +240,60 @@ export default function CreateProjectPage() {
             project URL.
           </p>
 
-          <div aria-live="polite">
-            <p
-              id="link-error"
-              className="text-sm text-red-600"
-            />
+          <div
+            id="link-error"
+            aria-live="polite"
+          >
+            {state.errors?.link?.map(
+              (error: string) => (
+                <p
+                  key={error}
+                  className="text-sm text-red-600"
+                >
+                  {error}
+                </p>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* Year Completed */}
+        <div>
+          <label
+            htmlFor="yearCompleted"
+            className="mb-2 block font-medium"
+          >
+            Year Completed
+          </label>
+
+          <input
+            id="yearCompleted"
+            name="yearCompleted"
+            type="number"
+            min="1900"
+            max={new Date().getFullYear()}
+            required
+            aria-invalid={Boolean(
+              state.errors?.yearCompleted?.length
+            )}
+            aria-describedby="yearCompleted-error"
+            className="w-full rounded-lg border p-3 focus:border-[#0B2545] focus:outline-none focus:ring-2 focus:ring-[#0B2545]"
+          />
+
+          <div
+            id="yearCompleted-error"
+            aria-live="polite"
+          >
+            {state.errors?.yearCompleted?.map(
+              (error: string) => (
+                <p
+                  key={error}
+                  className="mt-1 text-sm text-red-600"
+                >
+                  {error}
+                </p>
+              )
+            )}
           </div>
         </div>
 

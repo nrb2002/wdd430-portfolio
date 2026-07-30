@@ -20,7 +20,7 @@
 */
 @layer base {
   a {
-    @apply text-brand no-underline hover:text-indigo-600 underline-offset-4;
+    @apply no-underline hover:text-indigo-600 underline-offset-4;
   }
 }
 

@@ -8,6 +8,7 @@ export interface Project {
   description: string;
   type: "opensource" | "school";
   technologies: string[];
+  yearCompleted: number;
   link?: string;
 }
 
@@ -57,6 +58,24 @@ function sanitizeProjectType(
 }
 
 /**
+ * Select all project fields.
+ *
+ * The database column is year_completed,
+ * but the TypeScript property is yearCompleted.
+ * The alias keeps the database result consistent
+ * with the Project interface.
+ */
+const projectFields = `
+  id,
+  title,
+  description,
+  type,
+  technologies,
+  year_completed AS "yearCompleted",
+  link
+`;
+
+/**
  * Fetch all projects and optionally filter by type.
  */
 export async function getProjects(
@@ -66,7 +85,14 @@ export async function getProjects(
 
   if (sanitizedType) {
     const { rows } = await sql<Project>`
-      SELECT * 
+      SELECT
+        id,
+        title,
+        description,
+        type,
+        technologies,
+        year_completed AS "yearCompleted",
+        link
       FROM projects
       WHERE type = ${sanitizedType}
       ORDER BY id
@@ -76,7 +102,14 @@ export async function getProjects(
   }
 
   const { rows } = await sql<Project>`
-    SELECT *
+    SELECT
+      id,
+      title,
+      description,
+      type,
+      technologies,
+      year_completed AS "yearCompleted",
+      link
     FROM projects
     ORDER BY id
   `;
@@ -95,7 +128,14 @@ export async function getProjectById(
   }
 
   const { rows } = await sql<Project>`
-    SELECT *
+    SELECT
+      id,
+      title,
+      description,
+      type,
+      technologies,
+      year_completed AS "yearCompleted",
+      link
     FROM projects
     WHERE id = ${id}
   `;
@@ -130,7 +170,14 @@ export async function fetchFilteredProjects({
 
   if (sanitizedType) {
     const { rows } = await sql<Project>`
-      SELECT *
+      SELECT
+        id,
+        title,
+        description,
+        type,
+        technologies,
+        year_completed AS "yearCompleted",
+        link
       FROM projects
       WHERE
         type = ${sanitizedType}
@@ -153,7 +200,14 @@ export async function fetchFilteredProjects({
   }
 
   const { rows } = await sql<Project>`
-    SELECT *
+    SELECT
+      id,
+      title,
+      description,
+      type,
+      technologies,
+      year_completed AS "yearCompleted",
+      link
     FROM projects
     WHERE
       title ILIKE ${searchPattern}
@@ -229,8 +283,26 @@ export async function fetchProjectsPages({
     count = rows[0].count;
   }
 
-  return Math.ceil(
-    count / ITEMS_PER_PAGE
-  );
+  return Math.ceil(count / ITEMS_PER_PAGE);
 }
 
+// Select the latest 2 projects
+export async function getLatestProjects(
+  limit: number = 2
+): Promise<Project[]> {
+  const { rows } = await sql<Project>`
+    SELECT
+      id,
+      title,
+      description,
+      type,
+      technologies,
+      year_completed AS "yearCompleted",
+      link
+    FROM projects
+    ORDER BY year_completed DESC, id DESC
+    LIMIT ${limit}
+  `;
+
+  return rows;
+}
