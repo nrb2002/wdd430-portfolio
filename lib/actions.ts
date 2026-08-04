@@ -7,9 +7,16 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { signIn } from "@/auth";
+import { AuthError } from "next-auth";
+
 import { FormState } from "@/types/form"
 
-//Zod Schema
+
+// -------------------------
+// Zod Schema
+// -------------------------
+
 const ProjectFormSchema = z.object({
   title: z
     .string()
@@ -44,6 +51,32 @@ const ProjectFormSchema = z.object({
     .optional()
     .or(z.literal("")),
 });
+
+/*********************************************
+ * Action to authenticate a user
+ *********************************************/
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid email or password.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error; // re-throw so Next.js handles redirects correctly
+  }
+}
+
+// -------------------------
+// Project Actions
+// -------------------------
 
 export async function createProject(
   prevState: FormState,
@@ -213,3 +246,4 @@ export async function deleteProject(id: string) {
 
   redirect("/projects");
 }
+
