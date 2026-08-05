@@ -237,13 +237,14 @@ export async function deleteProject(id: string) {
       WHERE id = ${projectId}
     `;
 
+  revalidatePath("/projects");
+  redirect("/projects");
+  
   }catch(error){
     console.error('Error deleting project:', error);
     throw new Error('Unable to delete project. Please try again later.');
   }
 
-  revalidatePath("/projects");
-
-  redirect("/projects");
+  
 }
 

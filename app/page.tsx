@@ -33,7 +33,7 @@ export default async function Home() {
       {/* Latest Projects */}
       <section>
         <h2 className="mb-6 text-3xl font-bold">
-          Latest Projects
+          My Recent Projects
         </h2>
 
         {projects.length > 0 ? (
